@@ -44,10 +44,14 @@ package body Arun is
       Register_Handler (Builder      => Builder,
                         Handler_Name => "Main_Quit",
                         Handler      => Arun.Handlers.Quit'Access);
+
       Register_Handler (Builder      => Builder,
                         Handler_Name => "commandEntry_search_changed_cb",
                         Handler      => Arun.Handlers.Search_Changed'Access);
 
+      Register_Handler (Builder      => Builder,
+                        Handler_Name => "commandEntry_activate_cb",
+                        Handler      => Arun.Handlers.Execute_Command'Access);
       -- Step 3: call Do_Connect. Once to connect all registered handlers
       Do_Connect (Builder);
 
