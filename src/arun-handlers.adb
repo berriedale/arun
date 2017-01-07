@@ -4,14 +4,28 @@
 
 with Ada.Text_IO;
 with Gtk.Main;
-with Gtkada.Builder;
+with Gtk.Widget;
+with Gtk.Search_Entry;
+with Gtkada.Builder; use Gtkada.Builder;
 
 package body Arun.Handlers is
 
-   procedure Quit (Object : access Gtkada.Builder.Gtkada_Builder_Record'Class) is
+   procedure Quit (Object : access Gtkada_Builder_Record'Class) is
       pragma Unreferenced (Object);
    begin
       Ada.Text_IO.Put_Line ("Exiting arun");
       Gtk.Main.Main_Quit;
    end Quit;
+
+   procedure Search_Changed (Object : access Gtkada_Builder_Record'Class) is
+      use Ada.Text_IO;
+      use Gtk.Search_Entry;
+      use Gtkada.Builder;
+
+      Widget : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
+   begin
+      Put_Line ("Searching for " & Widget.Get_Text);
+   end Search_Changed;
+
+
 end Arun.Handlers;

@@ -38,11 +38,15 @@ package body Arun is
          Error_Free (Error);
          return;
       end if;
+
       --     Step 2: add calls to "Register_Handler" to associate your
       --     handlers with your callbacks.
       Register_Handler (Builder      => Builder,
                         Handler_Name => "Main_Quit",
                         Handler      => Arun.Handlers.Quit'Access);
+      Register_Handler (Builder      => Builder,
+                        Handler_Name => "commandEntry_search_changed_cb",
+                        Handler      => Arun.Handlers.Search_Changed'Access);
 
       -- Step 3: call Do_Connect. Once to connect all registered handlers
       Do_Connect (Builder);
