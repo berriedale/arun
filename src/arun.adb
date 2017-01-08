@@ -30,9 +30,9 @@ package body Arun is
       Gtk_New (Builder);
 
 
-      Return_Code := Add_From_File (Builder  => Builder,
-                                    Filename => "arun.glade",
-                                    Error    => Error'Access);
+      Return_Code := Add_From_Resource (Builder       => Builder,
+                                        Resource_Path => "/io/lasagna/arun/arun.glade",
+                                        Error         => Error'Access);
       if Error /= null then
          Put_Line ("Error : " & Get_Message (Error));
          Error_Free (Error);
