@@ -3,10 +3,13 @@
 ---
 
 with Ada.Text_IO;
+with GNAT.OS_Lib;
 with Gtk.Main;
 with Gtk.Widget;
 with Gtk.Search_Entry;
 with Gtkada.Builder; use Gtkada.Builder;
+
+with Arun.Launcher;
 
 package body Arun.Handlers is
 
@@ -34,8 +37,16 @@ package body Arun.Handlers is
       use Gtkada.Builder;
 
       Widget : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
+      Command : constant String := Widget.Get_Text;
+
+      Full_Path :  aliased constant String := Arun.Launcher.Find_Full_Path (Command);
    begin
-      Put_Line ("Should Execute: " & Widget.Get_Text);
+      Put_Line ("Should Execute: " & Command);
+
+      if Full_Path /= "" then
+         Arun.Launcher.Execute (Full_Path);
+      end if;
+
       Gtk.Main.Main_Quit;
    end Execute_Command;
 
