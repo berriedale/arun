@@ -41,9 +41,9 @@ package body Arun.Handlers is
 
       Full_Path :  aliased constant String := Arun.Launcher.Find_Full_Path (Command);
    begin
-      Put_Line ("Should Execute: " & Command);
 
       if Full_Path /= "" then
+         Put_Line ("Should Execute: " & Command);
          Arun.Launcher.Execute (Full_Path);
       end if;
 

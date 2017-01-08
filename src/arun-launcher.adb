@@ -55,12 +55,11 @@ package body Arun.Launcher is
       use Ada.Command_Line.Environment;
 
 
-      function Exec_And_Replace (Filename : in String;
-                                 Arguments : in Chars_Ptr_Array;
-                                 Env       : in Chars_Ptr_Array) return Integer
+      function Exec_And_Replace (Filename : in Char_Array;
+                                 Arguments : in Chars_Ptr_Array) return Integer
         with Import,
         Convention => C,
-        Link_Name => "execve";
+        Link_Name => "execv";
 
       procedure Print_Errno (Message : in String)
         with Import,
@@ -68,19 +67,13 @@ package body Arun.Launcher is
           Link_Name => "perror";
 
       Default_Args : Chars_Ptr_Array  (1 .. 2) := (1 => New_String (Executable_Path), 2 => Null_Ptr);
-      Environment_Args : Chars_Ptr_Array (1 .. Size_T(Environment_Count + 1)) := (others => Null_Ptr);
       Status : Integer;
    begin
-      -- Fierst we need to fill in our Environment_Args with the appropriate variables
-      for Index in 1 .. Environment_Count loop
-         Environment_Args (Size_T(Index)) := New_String (Environment_Value (Index));
-      end loop;
-
       Put_Line ("Spawning " & Executable_Path);
 
-      Status := Exec_And_Replace (Filename  => Executable_Path,
-                                  Arguments => Default_Args,
-                                  Env       => Environment_Args);
+      Status := Exec_And_Replace (Filename  => To_C (Item       => Executable_Path,
+                                                     Append_Nul => True),
+                                  Arguments => Default_Args);
 
       -- If the Exec_And_Replace function returns then something has gone wrong
       Put_Line ("Spawned " & Executable_Path & " with " & Status'Img);
