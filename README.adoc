@@ -1,0 +1,7 @@
+= arun
+
+Ada (Command) Runner is a simple command runner built with
+link:https://libre.adacore.com/tools/gtkada/[GtkAda].
+
+
+image::https://raw.githubusercontent.com/berriedale/arun/master/screenshot.png[A simple screenshot]
