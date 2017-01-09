@@ -18,21 +18,20 @@
 ------------------------------------------------------------------------------
 
 
-with Gtk; use Gtk;
+with Gtk;             use Gtk;
 with Gtk.Box;         use Gtk.Box;
 
 with Gtk.Label;       use Gtk.Label;
 with Gtk.Widget;      use Gtk.Widget;
 
-with Glib; use Glib;
-with Glib.Error;     use Glib.Error;
-with Gtk.Main; use Gtk.Main;
+with Glib;            use Glib;
+with Glib.Error;      use Glib.Error;
+with Gtk.Main;        use Gtk.Main;
 with Gtk.Window;      use Gtk.Window;
+with Gtkada.Builder;  use Gtkada.Builder;
 
 with Ada.Text_IO;
 with Arun.Handlers;
-
-with Gtkada.Builder; use Gtkada.Builder;
 
 package body Arun is
    procedure Main is
@@ -41,14 +40,13 @@ package body Arun is
       Return_Code : Guint;
 
       use Ada.Text_IO;
+      use Gtkada.Builder;
    begin
-      --  Initialize GtkAda.
+
       Gtk.Main.Init;
       Put_Line ("Starting arun");
 
-      --  Create a window with a size of 400x400
       Gtk_New (Builder);
-
 
       Return_Code := Add_From_Resource (Builder       => Builder,
                                         Resource_Path => "/io/lasagna/arun/arun.glade",
@@ -59,8 +57,6 @@ package body Arun is
          return;
       end if;
 
-      --     Step 2: add calls to "Register_Handler" to associate your
-      --     handlers with your callbacks.
       Register_Handler (Builder      => Builder,
                         Handler_Name => "Main_Quit",
                         Handler      => Arun.Handlers.Quit'Access);
@@ -72,16 +68,19 @@ package body Arun is
       Register_Handler (Builder      => Builder,
                         Handler_Name => "commandEntry_activate_cb",
                         Handler      => Arun.Handlers.Execute_Command'Access);
-      -- Step 3: call Do_Connect. Once to connect all registered handlers
+
       Do_Connect (Builder);
 
-      --  Find our main window, then display it and all of its children.
-      Gtk.Widget.Show_All ( Gtk_Widget (Gtkada.Builder.Get_Object (Builder, "commandWindow")));
+      declare
+         Command_Entry : Gtk_Widget := Gtk_Widget (Get_Object (builder, "commandEntry"));
+      begin
+         Command_Entry.On_Key_Release_Event (Call  => Arun.Handlers.Search_KeyPress'Access,
+                                             After => False);
+      end;
+
+      Gtk.Widget.Show_All ( Gtk_Widget (Get_Object (Builder, "commandWindow")));
       Gtk.Main.Main;
 
-      -- Step 4: when the application terminates or all Windows described through
-      --         your builder should be closed, call Unref to free memory
-      --         associated with the Builder.
       Unref (Builder);
    end Main;
 

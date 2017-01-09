@@ -22,6 +22,8 @@
 
 with Ada.Text_IO;
 with GNAT.OS_Lib;
+with Gdk.Event;
+with Gdk.Types.Keysyms;
 with Gtk.Main;
 with Gtk.Widget;
 with Gtk.Search_Entry;
@@ -67,5 +69,21 @@ package body Arun.Handlers is
 
       Gtk.Main.Main_Quit;
    end Execute_Command;
+
+   function Search_KeyPress (Widget : access Gtk.Widget.Gtk_Widget_Record'Class;
+                             Event  : in Gdk.Event.Gdk_Event_Key) return Boolean is
+      use Ada.Text_IO;
+      use Gdk.Types;
+
+   begin
+      Put_Line ("Key pressed");
+
+      if Event.Keyval = Gdk.Types.Keysyms.GDK_Escape then
+         Put_Line ("Escape! Exiting arun");
+         Gtk.Main.Main_Quit;
+      end if;
+
+      return True;
+   end Search_KeyPress;
 
 end Arun.Handlers;

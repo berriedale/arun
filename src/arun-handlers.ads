@@ -21,6 +21,8 @@
 ------------------------------------------------------------------------------
 
 with Gtkada.Builder; use Gtkada.Builder;
+with Gtk.Widget;
+with Gdk.Event;
 
 package Arun.Handlers is
 
@@ -32,5 +34,9 @@ package Arun.Handlers is
    procedure Execute_Command (Object : access Gtkada_Builder_Record'Class);
    -- On "activate" of the search entry call this handler (basically when the user
    -- hits the enter key
+
+   function Search_KeyPress (Widget : access Gtk.Widget.Gtk_Widget_Record'Class;
+                             Event  : in Gdk.Event.Gdk_Event_Key) return Boolean;
+   -- On key-presses in the commandEntry field
 
 end Arun.Handlers;
