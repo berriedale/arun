@@ -1,6 +1,3 @@
----
--- Basic GtkAda handlers for Arun
----
 ------------------------------------------------------------------------------
 --
 --  Copyright (C) 2017 R. Tyler Croy <tyler@linux.com>
@@ -21,25 +18,18 @@
 ------------------------------------------------------------------------------
 
 with Gtkada.Builder; use Gtkada.Builder;
-with Gtk.Widget;
-with Gdk.Event;
-
 with Arun.Launchers.Unix;
 
-package Arun.Handlers is
+with Gtk.Widget;
 
-   procedure Quit (Object : access Gtkada_Builder_Record'Class);
+package Arun.View is
 
-   procedure Search_Changed (Object : access Gtkada_Builder_Record'Class);
-   -- Whenever the search entry changes call this handler for autocompletion
+   type Arun_Builder_Record is new Gtkada_Builder_Record with record
+      Launcher : Arun.Launchers.Unix.UnixLauncher;
+   end record;
+   type Arun_Builder is access all Arun_Builder_Record'Class;
 
-   procedure Execute_Command (Object : access Gtkada_Builder_Record'Class);
-   -- On "activate" of the search entry call this handler (basically when the user
-   -- hits the enter key
+   function From_Object (Builder     : out Arun_Builder_Record'Class;
+                         Object_Name : in String) return Gtk.Widget.Gtk_Widget;
 
-   function Search_KeyPress (Widget : access Gtk.Widget.Gtk_Widget_Record'Class;
-                             Event  : in Gdk.Event.Gdk_Event_Key) return Boolean;
-   -- On key-presses in the commandEntry field
-
-
-end Arun.Handlers;
+end Arun.View;

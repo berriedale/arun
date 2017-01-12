@@ -29,7 +29,8 @@ with Gtk.Widget;
 with Gtk.Search_Entry;
 with Gtkada.Builder; use Gtkada.Builder;
 
-with Arun.Launcher;
+with Arun;
+with Arun.Launchers.Unix;
 
 package body Arun.Handlers is
 
@@ -59,13 +60,13 @@ package body Arun.Handlers is
       Widget : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
       Command : constant String := Widget.Get_Text;
 
-      Full_Path :  aliased constant String := Arun.Launcher.Find_Full_Path (Command);
+      --Full_Path :  aliased constant String := Arun.Launcher.Find_Full_Path (Command);
    begin
 
-      if Full_Path /= "" then
-         Put_Line ("Should Execute: " & Command);
-         Arun.Launcher.Execute (Full_Path);
-      end if;
+--        if Full_Path /= "" then
+--           Put_Line ("Should Execute: " & Command);
+--           --Arun.Launcher.Execute (Full_Path);
+--        end if;
 
       Gtk.Main.Main_Quit;
    end Execute_Command;
@@ -74,11 +75,16 @@ package body Arun.Handlers is
                              Event  : in Gdk.Event.Gdk_Event_Key) return Boolean is
       use Ada.Text_IO;
       use Gdk.Types;
+      use Gdk.Types.Keysyms;
 
    begin
-      Put_Line ("Key pressed");
 
-      if Event.Keyval = Gdk.Types.Keysyms.GDK_Escape then
+      if Event.Keyval = GDK_Tab then
+         Put_Line ("Should attempt to auto-complete");
+      end if;
+
+
+      if Event.Keyval = GDK_Escape then
          Put_Line ("Escape! Exiting arun");
          Gtk.Main.Main_Quit;
       end if;

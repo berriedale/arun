@@ -17,11 +17,17 @@
 --  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ------------------------------------------------------------------------------
 
-package Arun.Launcher is
 
-   function Find_Full_Path (Snippet : in String) return String;
-   -- Determine the full path of a Snippet based on the PATH environment variable
+with Gtk.Widget; use Gtk.Widget;
 
-   procedure Execute (Executable_Path : in String);
-   -- Spawn the process for the Executable_Path
-end Arun.Launcher;
+package body Arun.View is
+
+   function From_Object (Builder     : out Arun_Builder_Record'Class;
+                         Object_Name : in String) return Gtk_Widget is
+      -- Return the Gtk_Widget for the specified Object_Name in the Builder.
+      -- Basically pass the name of the widget given in Glade.
+      begin
+         return Gtk_Widget (Builder.Get_Object (Object_Name));
+   end From_Object;
+
+end Arun.View;

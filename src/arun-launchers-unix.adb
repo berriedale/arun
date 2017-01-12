@@ -17,6 +17,7 @@
 --  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ------------------------------------------------------------------------------
 
+
 with Ada.Text_IO;  use Ada.Text_IO;
 with Ada.Command_Line.Environment;
 with Ada.Environment_Variables;
@@ -25,32 +26,40 @@ with GNAT.OS_Lib;
 with GNAT.String_Split;
 with Interfaces.C;
 with Interfaces.C.Strings;
-with System;
 
-package body Arun.Launcher is
 
-   function Find_Full_Path (Snippet : in String) return String is
-      use GNAT.String_Split;
+package body Arun.Launchers.Unix is
 
-      PATH : constant String := Ada.Environment_Variables.Value ("PATH");
+   procedure Initialize (L : in out UnixLauncher) is
+      use Gnat.String_Split;
+
+      PATH      : constant String := Ada.Environment_Variables.Value ("PATH");
       Separator : constant String := ":";
-      Path_Components : Slice_Set;
-
    begin
 
-      Create (S          => Path_Components,
-              From       => PATH,
-              Separators => Separator,
-              Mode       => Single);
+      Create (L.Path_Components, PATH, Separator, Single);
+
+      L.Initialized := True;
+   end Initialize;
 
 
-      for Index in 1 .. Slice_Count (Path_Components) loop
-         Put_Line ("Looking for an executable in " & Slice (S     => Path_Components,
+   function Find_Full_Path (L            : in UnixLauncher;
+                            Path_Snippet : in String) return String is
+      use GNAT.String_Split;
+   begin
+
+      if L.Initialized /= True then
+         Put_Line ("Uninitialized UnixLauncher!");
+         return "";
+      end if;
+
+      for Index in 1 .. Slice_Count (L.Path_Components) loop
+         Put_Line ("Looking for an executable in " & Slice (S     => L.Path_Components,
                           Index => Index));
          declare
-            Path_Component : constant String := Slice (S     => Path_Components,
+            Path_Component : constant String := Slice (S     => L.Path_Components,
                                                        Index => Index);
-            Computed_Location : constant String := Path_Component & "/" & Snippet;
+            Computed_Location : constant String := Path_Component & "/" & Path_Snippet;
          begin
 
             if GNAT.OS_Lib.Is_Executable_File (Computed_Location) then
@@ -61,12 +70,13 @@ package body Arun.Launcher is
 
       end loop;
 
-
       return "";
    end Find_Full_Path;
 
 
-   procedure Execute (Executable_Path : in String) is
+   procedure Execute (L          : in UnixLauncher;
+                      Executable : in String) is
+
       use GNAT.OS_Lib;
       use Interfaces.C;
       use Interfaces.C.Strings;
@@ -84,22 +94,21 @@ package body Arun.Launcher is
         Convention => C,
           Link_Name => "perror";
 
-      Default_Args : Chars_Ptr_Array  (1 .. 2) := (1 => New_String (Executable_Path), 2 => Null_Ptr);
+      Default_Args : Chars_Ptr_Array  (1 .. 2) := (1 => New_String (Executable), 2 => Null_Ptr);
       Status : Integer;
    begin
-      Put_Line ("Spawning " & Executable_Path);
+      Put_Line ("Spawning " & Executable);
 
-      Status := Exec_And_Replace (Filename  => To_C (Item       => Executable_Path,
+      Status := Exec_And_Replace (Filename  => To_C (Item       => Executable,
                                                      Append_Nul => True),
                                   Arguments => Default_Args);
 
       -- If the Exec_And_Replace function returns then something has gone wrong
-      Put_Line ("Spawned " & Executable_Path & " with " & Status'Img);
+      Put_Line ("Spawned " & Executable & " with " & Status'Img);
 
       if Status /= 0 then
          Print_Errno ("Something went wrong");
       end if;
 
    end Execute;
-
-end Arun.Launcher;
+end Arun.Launchers.Unix;
