@@ -26,6 +26,16 @@ package Arun.Launchers.Unix is
 
    procedure Initialize (L : in out UnixLauncher);
 
+   function Find_Full_Path (L            : in UnixLauncher;
+                         Path_Snippet : in String) return String;
+   -- Determine the full path of the snippet based on PATH or other environment
+   -- variables.
+   --
+   -- Will return an empty string if a full path was not discoverable.
+
+
+   procedure Execute (L          : in UnixLauncher;
+                      Executable : in String);
 private
 
    type UnixLauncher is new Arun.Launcher_Type with record

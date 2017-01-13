@@ -19,4 +19,21 @@
 
 package Arun is
    procedure Main;
+
+   type Launcher_Type is interface;
+
+   procedure Initialize (L : in Launcher_Type'Class) is abstract;
+   -- Launcher_Type-specific initialization routine
+
+   function Find_Full_Path (L            : in Launcher_Type;
+                            Path_Snippet : in String) return String is abstract;
+   -- Determine the full path of the snippet based on PATH or other environment
+   -- variables.
+   --
+   -- Will return an empty string if a full path was not discoverable.
+
+   procedure Execute (L          : in Launcher_Type;
+                      Executable : in String) is abstract;
+   -- Spawn the Executable in place of the current process
+
 end Arun;
