@@ -31,6 +31,7 @@ with Gtkada.Builder; use Gtkada.Builder;
 
 with Arun;
 with Arun.Launchers.Unix;
+with Arun.View; use Arun.View;
 
 package body Arun.Handlers is
 
@@ -59,14 +60,15 @@ package body Arun.Handlers is
 
       Widget : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
       Command : constant String := Widget.Get_Text;
-
-      --Full_Path :  aliased constant String := Arun.Launcher.Find_Full_Path (Command);
+      B       : Arun.View.Arun_Builder_Record renames Arun.View.Arun_Builder_Record (Object.all);
+      L : Arun.Launchers.Unix.UnixLauncher renames Arun.Launchers.Unix.UnixLauncher (B.Launcher);
+      Full_Path :  aliased constant String := L.Find_Full_Path (Command);
    begin
 
---        if Full_Path /= "" then
---           Put_Line ("Should Execute: " & Command);
---           --Arun.Launcher.Execute (Full_Path);
---        end if;
+      if Full_Path /= "" then
+         Put_Line ("Should Execute: " & Command);
+         L.Execute (Full_Path);
+      end if;
 
       Gtk.Main.Main_Quit;
    end Execute_Command;

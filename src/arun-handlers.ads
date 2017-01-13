@@ -26,6 +26,8 @@ with Gdk.Event;
 
 with Arun.Launchers.Unix;
 
+with Arun.View; use Arun.View;
+
 package Arun.Handlers is
 
    procedure Quit (Object : access Gtkada_Builder_Record'Class);

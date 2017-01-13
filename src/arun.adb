@@ -17,36 +17,33 @@
 --  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ------------------------------------------------------------------------------
 
-
-with Gtk;             use Gtk;
-with Gtk.Box;         use Gtk.Box;
-
-with Gtk.Label;       use Gtk.Label;
 with Gtk.Widget;      use Gtk.Widget;
 
 with Glib;            use Glib;
 with Glib.Error;      use Glib.Error;
 with Gtk.Main;        use Gtk.Main;
-with Gtk.Window;      use Gtk.Window;
 with Gtkada.Builder;  use Gtkada.Builder;
 
 with Ada.Text_IO;
 with Arun.Handlers;
+with Arun.View;
 
 package body Arun is
    procedure Main is
-      Builder     : Gtkada_Builder;
+      use Ada.Text_IO;
+      use Gtkada.Builder;
+      use Arun.View;
+
+      Builder     : Arun_Builder;
       Error       : aliased Glib.Error.GError;
       Return_Code : Guint;
 
-      use Ada.Text_IO;
-      use Gtkada.Builder;
    begin
 
       Gtk.Main.Init;
-      Put_Line ("Starting arun");
-
-      Gtk_New (Builder);
+      Builder := new Arun_Builder_Record;
+      Gtkada.Builder.Initialize (Builder);
+      Builder.Launcher.Initialize;
 
       Return_Code := Add_From_Resource (Builder       => Builder,
                                         Resource_Path => "/io/lasagna/arun/arun.glade",
@@ -68,18 +65,18 @@ package body Arun is
       Register_Handler (Builder      => Builder,
                         Handler_Name => "commandEntry_activate_cb",
                         Handler      => Arun.Handlers.Execute_Command'Access);
-
       Do_Connect (Builder);
 
+      -- Connect commandEntry specific signals
       declare
-         Command_Entry : Gtk_Widget := Gtk_Widget (Get_Object (builder, "commandEntry"));
+         Command_Entry : Gtk_Widget := Builder.From_Object ("commandEntry");
       begin
          Command_Entry.On_Key_Release_Event (Call  => Arun.Handlers.Search_KeyPress'Access,
                                              After => False);
       end;
 
-      Gtk.Widget.Show_All ( Gtk_Widget (Get_Object (Builder, "commandWindow")));
-      Gtk.Main.Main;
+      Gtk.Widget.Show_All (Builder.From_Object ("commandWindow"));
+                            Gtk.Main.Main;
 
       Unref (Builder);
    end Main;
