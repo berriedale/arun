@@ -29,6 +29,8 @@ with Gtk.Widget;
 with Gtk.Search_Entry;
 with Gtkada.Builder; use Gtkada.Builder;
 
+with GNAT.String_Split;
+
 with Arun;
 with Arun.Launchers.Unix;
 with Arun.View; use Arun.View;
@@ -53,21 +55,37 @@ package body Arun.Handlers is
    end Search_Changed;
 
 
+   function Slice_Command (Text : in String) return GNAT.String_Split.Slice_Set is
+      use GNAT.String_Split;
+
+      Separator : constant String := " ";
+      Slices    : Slice_Set;
+   begin
+
+      Create (Slices, Text, Separator, Single);
+
+      return Slices;
+   end Slice_Command;
+
    procedure Execute_Command (Object : access Gtkada_Builder_Record'Class) is
       use Ada.Text_IO;
       use Gtk.Search_Entry;
       use Gtkada.Builder;
+      use GNAT.String_Split;
 
-      Widget : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
-      Command : constant String := Widget.Get_Text;
-      B       : Arun.View.Arun_Builder_Record renames Arun.View.Arun_Builder_Record (Object.all);
-      L : Arun.Launchers.Unix.UnixLauncher renames Arun.Launchers.Unix.UnixLauncher (B.Launcher);
+      Widget  : Gtk_Search_Entry := Gtk_Search_Entry (Get_Object (Object, "commandEntry"));
+      Builder : Arun.View.Arun_Builder_Record renames Arun.View.Arun_Builder_Record (Object.all);
+      L       : Arun.Launchers.Unix.UnixLauncher renames Arun.Launchers.Unix.UnixLauncher (Builder.Launcher);
+
+
+      Slices  : constant Slice_Set := Slice_Command (Widget.Get_Text);
+      Command : constant String := Slice (S => Slices, Index => 1);
       Full_Path :  aliased constant String := L.Find_Full_Path (Command);
    begin
 
       if Full_Path /= "" then
-         Put_Line ("Should Execute: " & Command);
-         L.Execute (Full_Path);
+         Put_Line ("Should Execute: " & Full_Path);
+         L.Execute (Full_Path, Slices);
       end if;
 
       Gtk.Main.Main_Quit;

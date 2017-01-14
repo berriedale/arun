@@ -19,7 +19,7 @@
 
 with Arun;
 
-private with GNAT.String_Split;
+with GNAT.String_Split;
 
 package Arun.Launchers.Unix is
    type UnixLauncher is new Arun.Launcher_Type with private;
@@ -34,8 +34,12 @@ package Arun.Launchers.Unix is
    -- Will return an empty string if a full path was not discoverable.
 
 
-   procedure Execute (L          : in UnixLauncher;
-                      Executable : in String);
+   procedure Execute (L               : in UnixLauncher;
+                      Executable_Path : in String;
+                      Argv            : in GNAT.String_Split.Slice_Set);
+   -- Execute a command using the given UnixLauncher with an "Argv"
+   -- Slice_Set assuming the first argument is the command and subsequent values
+   -- are arguments for that command.
 private
 
    type UnixLauncher is new Arun.Launcher_Type with record

@@ -74,41 +74,48 @@ package body Arun.Launchers.Unix is
    end Find_Full_Path;
 
 
-   procedure Execute (L          : in UnixLauncher;
-                      Executable : in String) is
 
-      use GNAT.OS_Lib;
+
+   function Exec_And_Replace (Filename : in Interfaces.C.Char_Array;
+                              Arguments : in Interfaces.C.Strings.Chars_Ptr_Array) return Integer
+     with Import,
+     Convention => C,
+     Link_Name => "execv";
+
+   procedure Print_Errno (Message : in String)
+     with Import,
+     Convention => C,
+       Link_Name => "perror";
+
+   procedure Execute (L               : in UnixLauncher;
+                      Executable_Path : in String;
+                      Argv            : in GNAT.String_Split.Slice_Set) is
+      use GNAT.String_Split;
       use Interfaces.C;
       use Interfaces.C.Strings;
-      use Ada.Command_Line.Environment;
 
-
-      function Exec_And_Replace (Filename : in Char_Array;
-                                 Arguments : in Chars_Ptr_Array) return Integer
-        with Import,
-        Convention => C,
-        Link_Name => "execv";
-
-      procedure Print_Errno (Message : in String)
-        with Import,
-        Convention => C,
-          Link_Name => "perror";
-
-      Default_Args : Chars_Ptr_Array  (1 .. 2) := (1 => New_String (Executable), 2 => Null_Ptr);
       Status : Integer;
+      Argc : constant Size_T := Size_T (Slice_Count (Argv));
+      Arguments : Chars_Ptr_Array (1 .. (Argc + 1)) := (others => Null_Ptr);
    begin
-      Put_Line ("Spawning " & Executable);
+      -- For the first argument, we must replace the executable name with
+      -- the full path, e.g. "xeyes" => "/usr/bin/xeyes"
+      Arguments (1) := New_String (Executable_Path);
+      for Index in 1 .. Argc loop
+         Arguments (Index) := New_String (Slice (S     => Argv,
+                                                 Index => Slice_Number (Index)));
+      end loop;
 
-      Status := Exec_And_Replace (Filename  => To_C (Item       => Executable,
+      Put_Line ("Spawning " & Executable_Path);
+
+      Status := Exec_And_Replace (Filename  => To_C (Item       => Executable_Path,
                                                      Append_Nul => True),
-                                  Arguments => Default_Args);
+                                  Arguments => Arguments);
 
       -- If the Exec_And_Replace function returns then something has gone wrong
-      Put_Line ("Spawned " & Executable & " with " & Status'Img);
-
       if Status /= 0 then
          Print_Errno ("Something went wrong");
       end if;
-
    end Execute;
+
 end Arun.Launchers.Unix;

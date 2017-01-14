@@ -17,6 +17,8 @@
 --  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ------------------------------------------------------------------------------
 
+with GNAT.String_Split;
+
 package Arun is
    procedure Main;
 
@@ -32,8 +34,9 @@ package Arun is
    --
    -- Will return an empty string if a full path was not discoverable.
 
-   procedure Execute (L          : in Launcher_Type;
-                      Executable : in String) is abstract;
+   procedure Execute (L               : in Launcher_Type;
+                      Executable_Path : in String;
+                      Argv            : in GNAT.String_Split.Slice_Set) is abstract;
    -- Spawn the Executable in place of the current process
 
 end Arun;
