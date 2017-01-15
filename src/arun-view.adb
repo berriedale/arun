@@ -19,6 +19,7 @@
 
 
 with Gtk.Widget; use Gtk.Widget;
+with Ada.Text_IO;
 
 package body Arun.View is
 

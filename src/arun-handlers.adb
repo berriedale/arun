@@ -96,7 +96,6 @@ package body Arun.Handlers is
       use Ada.Text_IO;
       use Gdk.Types;
       use Gdk.Types.Keysyms;
-
    begin
 
       if Event.Keyval = GDK_Tab then

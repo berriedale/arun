@@ -22,6 +22,9 @@ with Arun;
 with GNAT.String_Split;
 
 package Arun.Launchers.Unix is
+
+   MAX_FILENAME_LENGTH : constant := 255;
+
    type UnixLauncher is new Arun.Launcher_Type with private;
 
    procedure Initialize (L : in out UnixLauncher);
@@ -40,6 +43,8 @@ package Arun.Launchers.Unix is
    -- Execute a command using the given UnixLauncher with an "Argv"
    -- Slice_Set assuming the first argument is the command and subsequent values
    -- are arguments for that command.
+
+   function Discover_Executables (L : in UnixLauncher) return Arun.String_Vectors.Vector;
 private
 
    type UnixLauncher is new Arun.Launcher_Type with record

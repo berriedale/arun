@@ -22,6 +22,7 @@ with Ada.Text_IO;  use Ada.Text_IO;
 with Ada.Command_Line.Environment;
 with Ada.Environment_Variables;
 
+with GNAT.Directory_Operations;
 with GNAT.OS_Lib;
 with GNAT.String_Split;
 with Interfaces.C;
@@ -38,7 +39,6 @@ package body Arun.Launchers.Unix is
    begin
 
       Create (L.Path_Components, PATH, Separator, Single);
-
       L.Initialized := True;
    end Initialize;
 
@@ -117,5 +117,43 @@ package body Arun.Launchers.Unix is
          Print_Errno ("Something went wrong");
       end if;
    end Execute;
+
+
+   function Discover_Executables (L : in UnixLauncher) return Arun.String_Vectors.Vector is
+      use GNAT.Directory_Operations;
+      use GNAT.OS_Lib;
+      use GNAT.String_Split;
+      use Ada.Strings.Unbounded;
+
+      Dir : Dir_Type;
+      File_Name : String (1 .. MAX_FILENAME_LENGTH);
+      File_Index : Natural := 0;
+      Executables : Arun.String_Vectors.Vector;
+   begin
+      for Index in 1 .. Slice_Count (L.Path_Components) loop
+         declare
+            Path_Dir : constant String := Slice (L.Path_Components, Index);
+         begin
+            if Is_Directory (Path_Dir) then
+               Open (Dir, Path_Dir);
+               loop
+                  Read (Dir, File_Name, File_Index);
+                  exit when File_Index = 0;
+                  declare
+                     Name : constant String := File_Name (1 .. File_Index);
+                     Full_Path : constant String := Path_Dir & "/" & Name;
+                  begin
+                     if Is_Executable_File (Full_Path) then
+                        Executables.Append (To_Unbounded_String (Name));
+                     end if;
+                  end;
+               end loop;
+               Close (Dir);
+            end if;
+         end;
+      end loop;
+      return Executables;
+   end Discover_Executables;
+
 
 end Arun.Launchers.Unix;

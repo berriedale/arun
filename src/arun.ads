@@ -18,11 +18,17 @@
 ------------------------------------------------------------------------------
 
 with GNAT.String_Split;
+with Ada.Containers.Vectors;
+with Ada.Strings.Unbounded;
 
 package Arun is
    procedure Main;
 
    type Launcher_Type is interface;
+
+   type Discovered_Executable_Handler is access function (L : in Launcher_Type'Class;
+                                                          Name : in String;
+                                                          Full_Path : in String) return Boolean;
 
    procedure Initialize (L : in Launcher_Type'Class) is abstract;
    -- Launcher_Type-specific initialization routine
@@ -38,5 +44,14 @@ package Arun is
                       Executable_Path : in String;
                       Argv            : in GNAT.String_Split.Slice_Set) is abstract;
    -- Spawn the Executable in place of the current process
+
+   function Compare_Strings (Left  : in Ada.Strings.Unbounded.Unbounded_String;
+                             Right : in Ada.Strings.Unbounded.Unbounded_String) return Boolean;
+   package String_Vectors is new Ada.Containers.Vectors (Index_Type   => Natural,
+                                                         Element_Type => Ada.Strings.Unbounded.Unbounded_String,
+                                                         "="          => Compare_Strings);
+
+   function Discover_Executables (L : in Launcher_Type) return String_Vectors.Vector is abstract;
+   -- Discover executables which can be launched by the configured Launcher_Type
 
 end Arun;
