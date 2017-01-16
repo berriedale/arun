@@ -17,6 +17,11 @@
 --  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ------------------------------------------------------------------------------
 
+
+with GNAT.OS_Lib;
+with GNAT.Directory_Operations;
+with Ada.Strings.Unbounded;
+
 with Gtk.Widget;      use Gtk.Widget;
 with Gtk.GEntry;
 with Gtk.Entry_Completion;
@@ -25,27 +30,57 @@ with Gtk.List_Store;
 
 with Glib;            use Glib;
 with Glib.Error;      use Glib.Error;
-with Glib.Values;
 with Gtk.Main;        use Gtk.Main;
 with Gtkada.Builder;  use Gtkada.Builder;
+with Glib.Values;
 
 with Ada.Text_IO;
 with Arun.Handlers;
 with Arun.View;
 
-with GNAT.OS_Lib;
-with GNAT.Directory_Operations;
-with Ada.Strings.Unbounded;
-
 package body Arun is
+
+   procedure Rig_Autocomplete (Builder : in Arun.View.Arun_Builder) is
+   -- Rig up the autocomplete support for the "commandEntry"
+
+      use Gtk.Entry_Completion;
+      use Gtk.List_Store;
+      use Gtk.Tree_Model;
+      use Ada.Strings.Unbounded;
+
+      Completion_Types : constant GType_Array (1 .. 1) := (1 => GType_String);
+      Items : Gtk_List_Store := Gtk_List_Store_Newv (Types => Completion_Types);
+      Iter : Gtk_Tree_Iter;
+      Command_Entry : Gtk.GEntry.Gtk_Entry := Gtk.GEntry.Gtk_Entry (Builder.From_Object ("commandEntry"));
+      Command_Completion : aliased Gtk_Entry_Completion := Gtk_Entry_Completion_New;
+
+      Completion_String : Glib.Values.GValue;
+
+      Executables : String_Vectors.Vector := Builder.Launcher.Discover_Executables;
+   begin
+      for Element of Executables loop
+         Items.Append (Iter);
+         Glib.Values.Init_Set_String (Completion_String,
+                                      To_String (Element));
+         Items.Set_Value (Iter, 0, Completion_String);
+      end loop;
+
+      Command_Completion.Set_Model (Items.To_Interface);
+      Command_Completion.Set_Text_Column (Column => 0);
+      Command_Completion.Set_Inline_Completion (True);
+      Command_Completion.Set_Inline_Selection (True);
+      Command_Entry.Set_Completion (Completion => Command_Completion);
+      Command_Entry.On_Key_Release_Event (Call  => Arun.Handlers.Search_KeyPress'Access,
+                                          After => False);
+   end Rig_Autocomplete;
 
    function Compare_Strings (Left  : in Ada.Strings.Unbounded.Unbounded_String;
                              Right : in Ada.Strings.Unbounded.Unbounded_String) return Boolean is
+   -- Simple comparision function for the String_Vector
       use Ada.Strings.Unbounded;
    begin
       return Left = Right;
    end Compare_Strings;
-
 
    procedure Main is
       use Ada.Text_IO;
@@ -84,43 +119,10 @@ package body Arun is
                         Handler_Name => "commandEntry_activate_cb",
                         Handler      => Arun.Handlers.Execute_Command'Access);
       Do_Connect (Builder);
-
-      -- Connect commandEntry specific signals
-      declare
-         use Gtk.Entry_Completion;
-         use Gtk.List_Store;
-         use Gtk.Tree_Model;
-         use Ada.Strings.Unbounded;
-
-         Completion_Types : constant GType_Array (1 .. 1) := (1 => GType_String);
-         Items : Gtk_List_Store := Gtk_List_Store_Newv (Types => Completion_Types);
-         Iter : Gtk_Tree_Iter;
-         Command_Entry : Gtk.GEntry.Gtk_Entry := Gtk.GEntry.Gtk_Entry (Builder.From_Object ("commandEntry"));
-         Command_Completion : aliased Gtk_Entry_Completion := Gtk_Entry_Completion_New;
-
-         Completion_String : Glib.Values.GValue;
-         Executables : String_Vectors.Vector := Builder.Launcher.Discover_Executables;
-      begin
-         for Element of Executables loop
-            Items.Append (Iter);
-            Glib.Values.Init_Set_String (Completion_String,
-                                         To_String (Element));
-            Items.Set_Value (Iter, 0, Completion_String);
-         end loop;
-
-         Command_Completion.Set_Model (Items.To_Interface);
-         Command_Completion.Set_Text_Column (Column => 0);
-         Command_Completion.Set_Inline_Completion (True);
-         Command_Completion.Set_Inline_Selection (True);
-         Command_Entry.Set_Completion (Completion => Command_Completion);
-         Command_Entry.On_Key_Release_Event (Call  => Arun.Handlers.Search_KeyPress'Access,
-                                             After => False);
-      end;
+      Rig_Autocomplete (Builder);
 
       Gtk.Widget.Show_All (Builder.From_Object ("commandWindow"));
-                            Gtk.Main.Main;
-
+      Gtk.Main.Main;
       Unref (Builder);
    end Main;
-
 end Arun;
