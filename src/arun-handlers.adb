@@ -24,6 +24,7 @@ with Ada.Text_IO;
 with GNAT.OS_Lib;
 with Gdk.Event;
 with Gdk.Types.Keysyms;
+with Glib;
 with Gtk.Main;
 with Gtk.Widget;
 with Gtk.Search_Entry;
@@ -99,7 +100,15 @@ package body Arun.Handlers is
    begin
 
       if Event.Keyval = GDK_Tab then
-         Put_Line ("Should attempt to auto-complete");
+         -- When the Tab key is presented, let's assume the user is finishing
+         -- an auto-complete operation jump to the end so
+         -- they can add arguments if desired
+         declare
+            use Glib;
+            Search_Entry : Gtk.Search_Entry.Gtk_Search_Entry_Record renames Gtk.Search_Entry.Gtk_Search_Entry_Record (Widget.all);
+         begin
+            Search_Entry.Set_Position (-1);
+         end;
       end if;
 
 
