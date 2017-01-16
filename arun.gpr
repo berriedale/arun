@@ -15,9 +15,12 @@ project Arun is
       for Executable ("main.adb") use "arun";
    end Builder;
 
-   --  Enable Ada 2005.
+   --  Enable Ada 2012.
    package Compiler is
-      for Switches ("Ada") use ("-gnat2012");
+      for Switches ("Ada") use ("-gnat2012",
+                                "-fstack-check",
+                                "-gnata",
+                                "-gnato");
    end Compiler;
 
 end Arun;
