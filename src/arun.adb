@@ -99,7 +99,7 @@ package body Arun is
       Builder.Launcher.Initialize;
 
       Return_Code := Add_From_Resource (Builder       => Builder,
-                                        Resource_Path => "/io/lasagna/arun/arun.glade",
+                                        Resource_Path => "/io/lasagna/arun/resources/arun.glade",
                                         Error         => Error'Access);
       if Error /= null then
          Put_Line ("Error : " & Get_Message (Error));
