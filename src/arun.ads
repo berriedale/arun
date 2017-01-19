@@ -14,7 +14,8 @@
 --
 --  You should have received a copy of the GNU General Public License
 --  along with this program; if not, write to the Free Software
---  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+--  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+--  02110-1301, USA.
 ------------------------------------------------------------------------------
 
 with GNAT.String_Split;
@@ -26,32 +27,38 @@ package Arun is
 
    type Launcher_Type is interface;
 
-   type Discovered_Executable_Handler is access function (L : in Launcher_Type'Class;
-                                                          Name : in String;
-                                                          Full_Path : in String) return Boolean;
+   type Discovered_Executable_Handler is
+     access function (L         : in Launcher_Type'Class;
+                      Name      : in String;
+                      Full_Path : in String) return Boolean;
 
-   procedure Initialize (L : in Launcher_Type'Class) is abstract;
-   -- Launcher_Type-specific initialization routine
-
-   function Find_Full_Path (L            : in Launcher_Type;
-                            Path_Snippet : in String) return String is abstract;
-   -- Determine the full path of the snippet based on PATH or other environment
-   -- variables.
+   --  Determine the full path of the snippet based on PATH or other
+   --  environment variables.
    --
-   -- Will return an empty string if a full path was not discoverable.
+   --  Will return an empty string if a full path was not
+   --  discoverable.
+   --
+   function Find_Full_Path (L            : in Launcher_Type;
+                            Path_Snippet : in String) return String is
+                              abstract;
 
+   --  Spawn the Executable in place of the current process
+   --
    procedure Execute (L               : in Launcher_Type;
                       Executable_Path : in String;
-                      Argv            : in GNAT.String_Split.Slice_Set) is abstract;
-   -- Spawn the Executable in place of the current process
+                      Argv            : in GNAT.String_Split.Slice_Set) is
+     abstract;
 
-   function Compare_Strings (Left  : in Ada.Strings.Unbounded.Unbounded_String;
-                             Right : in Ada.Strings.Unbounded.Unbounded_String) return Boolean;
-   package String_Vectors is new Ada.Containers.Vectors (Index_Type   => Natural,
-                                                         Element_Type => Ada.Strings.Unbounded.Unbounded_String,
-                                                         "="          => Compare_Strings);
+   package String_Vectors is
+     new Ada.Containers.Vectors
+           (Index_Type   => Natural,
+            Element_Type => Ada.Strings.Unbounded.Unbounded_String,
+            "="          => Ada.Strings.Unbounded."=");
 
-   function Discover_Executables (L : in Launcher_Type) return String_Vectors.Vector is abstract;
-   -- Discover executables which can be launched by the configured Launcher_Type
+   --  Discover executables which can be launched by the configured
+   --  Launcher_Type
+   --
+   function Discover_Executables (L : in Launcher_Type)
+                                 return String_Vectors.Vector is abstract;
 
 end Arun;

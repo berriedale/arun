@@ -14,21 +14,20 @@
 --
 --  You should have received a copy of the GNU General Public License
 --  along with this program; if not, write to the Free Software
---  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+--  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+--  02110-1301, USA.
 ------------------------------------------------------------------------------
 
-
 with Gtk.Widget; use Gtk.Widget;
-with Ada.Text_IO;
 
 package body Arun.View is
 
    function From_Object (Builder     : out Arun_Builder_Record'Class;
                          Object_Name : in String) return Gtk_Widget is
-      -- Return the Gtk_Widget for the specified Object_Name in the Builder.
-      -- Basically pass the name of the widget given in Glade.
-      begin
-         return Gtk_Widget (Builder.Get_Object (Object_Name));
+      --  Return the Gtk_Widget for the specified Object_Name in the Builder.
+      --  Basically pass the name of the widget given in Glade.
+   begin
+      return Gtk_Widget (Builder.Get_Object (Object_Name));
    end From_Object;
 
 end Arun.View;

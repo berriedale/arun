@@ -14,7 +14,8 @@
 --
 --  You should have received a copy of the GNU General Public License
 --  along with this program; if not, write to the Free Software
---  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+--  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+--  02110-1301, USA.
 ------------------------------------------------------------------------------
 
 with Arun;
@@ -29,27 +30,33 @@ package Arun.Launchers.Unix is
 
    procedure Initialize (L : in out UnixLauncher);
 
+   --  Determine the full path of the snippet based on PATH or other
+   --  environment variables.
+   --
+   --  Will return an empty string if a full path was not discoverable.
+   --
+   overriding
    function Find_Full_Path (L            : in UnixLauncher;
                          Path_Snippet : in String) return String;
-   -- Determine the full path of the snippet based on PATH or other environment
-   -- variables.
+
+   --  Execute a command using the given UnixLauncher with an "Argv"
+   --  Slice_Set assuming the first argument is the command and
+   --  subsequent values are arguments for that command.
    --
-   -- Will return an empty string if a full path was not discoverable.
-
-
+   overriding
    procedure Execute (L               : in UnixLauncher;
                       Executable_Path : in String;
                       Argv            : in GNAT.String_Split.Slice_Set);
-   -- Execute a command using the given UnixLauncher with an "Argv"
-   -- Slice_Set assuming the first argument is the command and subsequent values
-   -- are arguments for that command.
 
-   function Discover_Executables (L : in UnixLauncher) return Arun.String_Vectors.Vector;
+   overriding
+   function Discover_Executables (L : in UnixLauncher)
+                                 return Arun.String_Vectors.Vector;
+
 private
 
    type UnixLauncher is new Arun.Launcher_Type with record
       Initialized     : Boolean := False;
-      Path_Components : Gnat.String_Split.Slice_Set;
+      Path_Components : GNAT.String_Split.Slice_Set;
    end record;
 
 end Arun.Launchers.Unix;
