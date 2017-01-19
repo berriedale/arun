@@ -58,6 +58,12 @@ package body Arun.Handlers is
       Full_Path :  aliased constant String := L.Find_Full_Path (Command);
    begin
 
+      if Command (1) = '/' then
+         --  If the command starts with a slash, it's likely already a
+         --  full path so just try to execute it!
+         L.Execute (Command, Slices);
+      end if;
+
       if Full_Path /= "" then
          Put_Line ("Should Execute: " & Full_Path);
          L.Execute (Full_Path, Slices);
