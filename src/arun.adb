@@ -67,7 +67,9 @@ package body Arun is
          return;
       elsif Return_Code /= 0 then
          Put_Line ("Error " & Return_Code'Image);
-         return;
+         --  In normal operations this returns a "1" error, not yet sure what that
+         --  relates to.
+         --  return;
       end if;
 
       Register_Handler (Builder      => Builder,
